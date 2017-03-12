@@ -28,14 +28,25 @@
   (let* ((def (sexp-at-point))
          (name (cadr def))
          (sig  (caddr def))
+         (vars (seq-remove (lambda (var) (string-prefix-p "&" var))
+                           (mapcar #'symbol-name sig)))
+         (uppercase-vars (mapcar #'upcase vars))
+         ;; TODO: handle \(fn ) macro signature at end of docstring
+         (var-regexp (concat "\\(" (mapconcat #'identity uppercase-vars "\\|") "\\)"))
          (docstr (cadddr def))
          (fragment-id (replace-regexp-in-string "[&()]" ""
                                                 (replace-regexp-in-string " " "-"
                                                                           (format "%S" sig))))
          (md-sig (format "* [%S](#%s) `%S`" name fragment-id sig))
-         (md-def-raw (format "### %S `%S`\n\n%s" name sig docstr))
-         (md-def (replace-regexp-in-string "`\\([^']+\\)'" "`\\1`" md-def-raw))
-         )
+         (docstr-1 (with-temp-buffer
+                     (insert docstr)
+                     (goto-char 0)
+                     (while (re-search-forward var-regexp nil t)
+                       (replace-match (format "`%s`" (downcase (match-string 0)))
+                                      t nil))
+                     (buffer-string)))
+         (md-def-raw (format "### %S `%S`\n\n%s" name sig docstr-1))
+         (md-def (replace-regexp-in-string "`\\([^']+\\)'" "`\\1`" md-def-raw)))
     (kill-new md-def)
     (kill-new md-sig)))
 
