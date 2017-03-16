@@ -22,8 +22,11 @@
 ;;; Code:
 
 
-(defun elu-copy-md-sig-and-doc ()
-  "Extract signature and documentation for a function/macro in markdown format."
+(defun elu-copy-md-sig-and-doc (&optional github)
+  "Extract signature and documentation for a function/macro in markdown format.
+
+If GITHUB is non-nil, format the signature as a link pointing to the documentation
+below."
   (interactive)
   (let* ((def (sexp-at-point))
          (name (cadr def))
@@ -36,8 +39,9 @@
          (docstr (if (stringp (cadddr def)) (cadddr def) ""))
          (fragment-id (replace-regexp-in-string "[&()]" ""
                                                 (replace-regexp-in-string " " "-"
-                                                                          (format "%S" sig))))
-         (md-sig (format "* [%S](#%s) `%S`" name fragment-id sig))
+                                                                          (format "%S-%S" name sig))))
+         (md-sig (if github (format "* [%S](#%s) `%S`" name fragment-id sig)
+                   (format "* %S `%S`" name sig)))
          (docstr-1 (with-temp-buffer
                      (insert docstr)
                      (goto-char 0)
