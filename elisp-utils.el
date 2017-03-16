@@ -33,7 +33,7 @@
          (uppercase-vars (mapcar #'upcase vars))
          ;; TODO: handle \(fn ) macro signature at end of docstring
          (var-regexp (concat "\\(" (mapconcat #'identity uppercase-vars "\\|") "\\)"))
-         (docstr (cadddr def))
+         (docstr (if (stringp (cadddr def)) (cadddr def) ""))
          (fragment-id (replace-regexp-in-string "[&()]" ""
                                                 (replace-regexp-in-string " " "-"
                                                                           (format "%S" sig))))
