@@ -68,17 +68,20 @@ This is equivalent to `elu-copy-md-sig-and-doc' with a prefix argument."
 The string may contain the following substitution sequences:
     <p>: package prefix (including final dash or other separator)
     <n>: function name including package prefix
-    <s>: function name without package prefix")
+    <s>: function name without package prefix
+    <<>: escape sequence for <")
 
 (defun elu--format-test-name (formatstr name)
   (let* ((prefix (car (s-match "[^-]*-" name)))
          (suffix (s-chop-prefix prefix name))
-         (matches (s-match-strings-all "<[psn]>" formatstr))
-         (sections (s-split "<[psn]>" formatstr))
+         (matches (s-match-strings-all "<[psn<]>" formatstr))
+         (sections (s-split "<[psn<]>" formatstr))
          (subst_matches (mapcar (lambda (x)
                                   (cond ((string= (car x) "<p>") prefix)
                                         ((string= (car x) "<s>") suffix)
-                                        ((string= (car x) "<n>") name)))
+                                        ((string= (car x) "<n>") name)
+                                        ((string= (car x) "<<>") "<")
+                                        ))
                                 matches))
          (subst_str (apply #'concat (-interleave sections subst_matches))))
     subst_str))
