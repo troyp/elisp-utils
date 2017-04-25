@@ -40,7 +40,9 @@ below."
          (fragment-id (replace-regexp-in-string "[&()]" ""
                                                 (replace-regexp-in-string " " "-"
                                                                           (format "%S-%S" name sig))))
-         (md-sig (if github (format "* [%S](#%s) `%S`" name fragment-id sig)
+         (md-sig (if github
+                     (format "* [%S](#%s) `%S`"
+                             name (replace-regexp-in-string "[?!]" "" fragment-id) sig)
                    (format "* %S `%S`" name sig)))
          (docstr-1 (with-temp-buffer
                      (insert docstr)
@@ -53,6 +55,12 @@ below."
          (md-def (replace-regexp-in-string "`\\([^']+\\)'" "`\\1`" md-def-raw)))
     (kill-new md-def)
     (kill-new md-sig)))
+
+(defun elu-github-copy-md-sig-and-doc ()
+  "Extract Github signature and documentation for a function/macro in markdown format.
+
+This is equivalent to `elu-copy-md-sig-and-doc' with a prefix argument."
+  (interactive) (elu-copy-md-sig-and-doc t))
 
 
 (provide 'elisp-utils)
