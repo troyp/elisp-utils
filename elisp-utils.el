@@ -55,9 +55,10 @@ below."
          (docstr-1 (with-temp-buffer
                      (insert docstr)
                      (goto-char 0)
-                     (while (re-search-forward var-regexp nil t)
-                       (replace-match (format "`%s`" (downcase (match-string 0)))
-                                      t nil))
+                     (let ((case-fold-search nil))
+                       (while (re-search-forward var-regexp nil t)
+                         (replace-match (format "`%s`" (downcase (match-string 0)))
+                                        t nil)))
                      (buffer-string)))
          (md-def-raw (format "### %S `%S`\n\n%s" name sig docstr-1))
          (md-def (replace-regexp-in-string "`\\([^']+\\)'" "`\\1`" md-def-raw)))
