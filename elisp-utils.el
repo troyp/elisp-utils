@@ -39,6 +39,7 @@ below."
   (let* ((def (sexp-at-point))
          (name (cadr def))
          (sig  (caddr def))
+         (sigstr (if sig (format "%S" sig) "()"))
          (vars (seq-remove (lambda (var) (string-prefix-p "&" var))
                            (mapcar #'symbol-name sig)))
          (uppercase-vars (mapcar #'upcase vars))
@@ -47,10 +48,12 @@ below."
          (docstr (if (stringp (cadddr def)) (cadddr def) ""))
          (fragment-id (replace-regexp-in-string "[&()]" ""
                                                 (replace-regexp-in-string " " "-"
-                                                                          (format "%S-%S" name sig))))
+                                                                          (if sig
+                                                                              (format "%S-%S" name sig)
+                                                                            (format "%S" name)))))
          (md-sig (if github
-                     (format "* [%S](#%s) `%S`"
-                             name (replace-regexp-in-string "[?!]" "" fragment-id) sig)
+                     (format "* [%S](#%s) `%s`"
+                             name (replace-regexp-in-string "[?!]" "" fragment-id) sigstr)
                    (format "* %S `%S`" name sig)))
          (docstr-1 (with-temp-buffer
                      (insert docstr)
@@ -60,7 +63,7 @@ below."
                          (replace-match (format "`%s`" (downcase (match-string 0)))
                                         t nil)))
                      (buffer-string)))
-         (md-def-raw (format "### %S `%S`\n\n%s" name sig docstr-1))
+         (md-def-raw (format "### %S `%s`\n\n%s" name sigstr docstr-1))
          (md-def (replace-regexp-in-string "`\\([^']+\\)'" "`\\1`" md-def-raw)))
     (kill-new md-def)
     (kill-new md-sig)))
